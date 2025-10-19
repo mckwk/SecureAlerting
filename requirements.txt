@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+kafka-python
+pydantic
+python-dotenv
+pytest
+pytest-asyncio
+aiohttp
+httpx
+requests
