@@ -36,6 +36,13 @@ async def create_alert(alert: AlertCreate):
     # Send the notification
     notifier.send_notification(alert_obj.model_dump())
 
+    # Send email notification
+    notifier.send_email_notification(
+        recipient="test_user@example.com",
+        subject=f"Alert: {alert.severity}",
+        message=f"Message: {alert.message}\nSeverity: {alert.severity}"
+    )
+
     return JSONResponse(
         status_code=201, content={
             "status": "Notification sent"})

@@ -11,6 +11,10 @@ services:
       - HOST=0.0.0.0
       - PORT=8000
       - ALLOW_ORIGINS=*
+      - SMTP_SERVER=
+      - SMTP_PORT=
+      - SMTP_USER=
+      - SMTP_PASSWORD=
     depends_on:
       broker:
         condition: service_healthy

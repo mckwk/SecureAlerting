@@ -3,7 +3,7 @@ import json
 from kafka import KafkaConsumer
 
 from config.settings import settings
-from services.notifier import Notifier
+from src.workers.notification_worker import NotificationWorker
 
 
 class ConsumerWorker:
@@ -15,15 +15,12 @@ class ConsumerWorker:
             auto_offset_reset='earliest',
             enable_auto_commit=True
         )
-        self.notifier = Notifier()
+        self.notification_worker = NotificationWorker()
 
     def run(self):
         for message in self.consumer:
             alert = message.value
-            self.process_alert(alert)
-
-    def process_alert(self, alert):
-        self.notifier.send_notification(alert)
+            self.notification_worker.process_alert(alert)
 
 
 if __name__ == "__main__":
