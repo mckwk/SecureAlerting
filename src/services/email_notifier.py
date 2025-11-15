@@ -4,9 +4,10 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from src.config.settings import settings
+from src.services.notifier import INotifier
 
 
-class EmailNotifier:
+class EmailNotifier(INotifier):
     def __init__(self):
         self.smtp_server = settings.SMTP_SERVER
         self.smtp_port = settings.SMTP_PORT
@@ -14,7 +15,7 @@ class EmailNotifier:
         self.smtp_password = settings.SMTP_PASSWORD
         self.logger = logging.getLogger(__name__)
 
-    def send_email(self, recipient, subject, message, severity, timestamp):
+    def send(self, recipient, subject, message, severity, timestamp):
         try:
             sender = "Secure Alerting <from@example.com>"
 

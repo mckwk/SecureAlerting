@@ -6,7 +6,8 @@ from kafka import KafkaConsumer
 from kafka.errors import NoBrokersAvailable
 
 from src.config.settings import settings
-from src.services.notification_service import EmailNotificationService
+from src.services.notification_service import NotificationService
+from src.services.notifier_factory import NotifierFactory
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -17,7 +18,9 @@ class ConsumerWorker:
         self.max_retries = max_retries
         self.retry_delay = retry_delay
         self.consumer = None
-        self.notification_service = EmailNotificationService()
+        notifier = NotifierFactory.get_notifier("email")
+        self.notification_service = NotificationService(notifier)
+
         self.connect_to_broker()
 
     def connect_to_broker(self):

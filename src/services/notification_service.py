@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.services.email_notifier import EmailNotifier
+from src.services.notifier import INotifier
 
 
 class INotificationService(ABC):
@@ -9,10 +9,9 @@ class INotificationService(ABC):
         pass
 
 
-class EmailNotificationService(INotificationService):
-    def __init__(self):
-        self.email_notifier = EmailNotifier()
+class NotificationService(INotificationService):
+    def __init__(self, notifier: INotifier):
+        self.notifier = notifier
 
     def send_notification(self, recipient, subject, message, severity, timestamp):
-        self.email_notifier.send_email(
-            recipient, subject, message, severity, timestamp)
+        self.notifier.send(recipient, subject, message, severity, timestamp)

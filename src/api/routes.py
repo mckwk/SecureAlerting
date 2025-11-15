@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from src.config.settings import settings
 from src.services.kafka_producer import AlertProducer
 
 router = APIRouter()
@@ -34,7 +35,7 @@ async def create_alert(alert: AlertCreate):
     alerts_db.append(alert_obj)
 
     # Publish the alert to Kafka
-    producer.send_alert("alert_notifications", alert_obj.dict())
+    producer.send_alert(settings.NOTIFICATION_TOPIC, alert_obj.dict())
 
     return JSONResponse(
         status_code=201, content={
