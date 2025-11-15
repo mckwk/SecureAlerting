@@ -20,21 +20,10 @@ class Notifier:
         self.notification_service = notification_service or EmailNotificationService()
         self.logger = logging.getLogger(__name__)
 
-    def send_notification(self, alert):
-        try:
-            # Calculate risk
-            risk_data = self.risk_evaluator.evaluate_risk(alert)
-            alert.update(risk_data)
-
-            self.logger.info(f"Sending notification with risk data: {alert}")
-            self.producer.send(self.topic, value=alert)
-            self.producer.flush()
-        except Exception as e:
-            self.logger.error(f"Failed to send notification: {e}")
-
-    def send_email_notification(self, recipient, subject, message):
+    def send_email_notification(self, recipient, subject, message, severity, timestamp):
         try:
             self.notification_service.send_notification(
-                recipient, subject, message)
+                recipient, subject, message, severity, timestamp
+            )
         except Exception as e:
             self.logger.error(f"Failed to send email: {e}")

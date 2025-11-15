@@ -1,6 +1,7 @@
 import logging
 import smtplib
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 from src.config.settings import settings
 
@@ -13,13 +14,21 @@ class EmailNotifier:
         self.smtp_password = settings.SMTP_PASSWORD
         self.logger = logging.getLogger(__name__)
 
-    def send_email(self, recipient, subject, message):
+    def send_email(self, recipient, subject, message, severity, timestamp):
         try:
-            sender = "Private Person <from@example.com>"
-            msg = MIMEText(message)
+            sender = "Secure Alerting <from@example.com>"
+        
+            with open("src/templates/alert_email_template.html", "r") as template_file:
+                html_template = template_file.read()
+            html_content = html_template.replace("{{ alert_message }}", message)\
+                                         .replace("{{ alert_severity }}", severity)\
+                                         .replace("{{ alert_timestamp }}", timestamp)
+
+            msg = MIMEMultipart("alternative")
             msg['Subject'] = subject
             msg['From'] = sender
             msg['To'] = recipient
+            msg.attach(MIMEText(html_content, "html"))
 
             with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
                 server.starttls()

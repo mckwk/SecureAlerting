@@ -1,8 +1,6 @@
 import json
-
 from kafka import KafkaProducer
-
-from config import settings
+from src.config.settings import settings
 
 
 class AlertProducer:

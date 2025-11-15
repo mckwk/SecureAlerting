@@ -80,9 +80,19 @@ def test_email_notification():
     recipient = "test_user@example.com"
     subject = "Test Alert"
     message = "This is a test email for alert notifications."
+    severity = "high"
+    timestamp = "2025-11-15T12:00:00Z"
 
     # Mock the EmailNotifier's send_email method
     with patch.object(EmailNotifier, "send_email", return_value=None) as mock_send_email:
         email_service = EmailNotificationService()
-        email_service.send_notification(recipient, subject, message)
-        mock_send_email.assert_called_once_with(recipient, subject, message)
+        email_service.send_notification(recipient, subject, message, severity, timestamp)
+
+        # Assert that send_email was called with the correct parameters
+        mock_send_email.assert_called_once_with(
+            recipient,
+            subject,
+            message,
+            severity,
+            timestamp
+        )
