@@ -1,5 +1,7 @@
 import json
+
 from kafka import KafkaProducer
+
 from src.config.settings import settings
 
 

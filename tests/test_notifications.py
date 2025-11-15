@@ -1,16 +1,14 @@
 import json
 import time
+from unittest.mock import patch
 
 import pytest
 import requests
 from kafka import KafkaConsumer
-from unittest.mock import patch
 
-from src.services.notifier import Notifier
 from src.models.risk_estimation import BaselineRiskModel
 from src.services.email_notifier import EmailNotifier
 from src.services.notification_service import EmailNotificationService
-
 
 # Constants
 API_URL = "http://localhost:8000/alerts/"
@@ -24,19 +22,20 @@ HEADERS = {
 
 def test_api():
     alert = {
-    "severity": "high",
-    "message": "Test alert notification from test_api()"
+        "severity": "high",
+        "message": "Test alert notification from test_api()"
     }
     response = requests.post(API_URL, json=alert, headers=HEADERS)
     assert response.status_code == 201, f"API test failed! Status code: {response.status_code}"
     assert "status" in response.json(), "API response missing 'status' key"
-    assert response.json()["status"] == "Notification sent", "Unexpected API response content"
+    assert response.json()[
+        "status"] == "Notification sent", "Unexpected API response content"
 
 
 def test_kafka_consumer():
     alert = {
-    "severity": "high",
-    "message": "Test alert notification from test_kafka_consumer()"
+        "severity": "high",
+        "message": "Test alert notification from test_kafka_consumer()"
     }
     response = requests.post(API_URL, json=alert, headers=HEADERS)
     assert response.status_code == 201, f"API test failed! Status code: {response.status_code}"
@@ -58,7 +57,6 @@ def test_kafka_consumer():
                 "Producer and Consumer test failed: No matching message received.")
 
 
-
 def test_baseline_risk_model():
     model = BaselineRiskModel()
     alert = {"severity": "high"}
@@ -68,12 +66,14 @@ def test_baseline_risk_model():
 
 
 def test_notification_with_risk_via_api():
-    alert = {"message": "Test alert from test_notification_with_risk_via_api()", "severity": "critical"}
+    alert = {"message": "Test alert from test_notification_with_risk_via_api()",
+             "severity": "critical"}
     response = requests.post(API_URL, json=alert, headers=HEADERS)
-    
+
     assert response.status_code == 201, f"API test failed! Status code: {response.status_code}"
     assert "status" in response.json(), "API response missing 'status' key"
-    assert response.json()["status"] == "Notification sent", "Unexpected API response content"
+    assert response.json()[
+        "status"] == "Notification sent", "Unexpected API response content"
 
 
 def test_email_notification():
@@ -86,7 +86,8 @@ def test_email_notification():
     # Mock the EmailNotifier's send_email method
     with patch.object(EmailNotifier, "send_email", return_value=None) as mock_send_email:
         email_service = EmailNotificationService()
-        email_service.send_notification(recipient, subject, message, severity, timestamp)
+        email_service.send_notification(
+            recipient, subject, message, severity, timestamp)
 
         # Assert that send_email was called with the correct parameters
         mock_send_email.assert_called_once_with(
