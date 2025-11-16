@@ -15,12 +15,11 @@ logger = logging.getLogger(__name__)
 
 
 class ConsumerWorker:
-    def __init__(self, max_retries=5, retry_delay=5):
+    def __init__(self, notification_service: NotificationService, max_retries=5, retry_delay=5):
+        self.notification_service = notification_service
         self.max_retries = max_retries
         self.retry_delay = retry_delay
         self.consumer = None
-        notifier = NotifierFactory.get_notifier("email")
-        self.notification_service = NotificationService(notifier)
 
         self.connect_to_broker()
 
@@ -34,7 +33,7 @@ class ConsumerWorker:
                     group_id=settings.KAFKA_CONSUMER_GROUP,
                     value_deserializer=lambda m: json.loads(m.decode('utf-8')),
                     auto_offset_reset='earliest',
-                    enable_auto_commit=True
+                    enable_auto_commit=False
                 )
                 logger.info("Connected to Kafka broker.")
                 return
@@ -70,12 +69,15 @@ class ConsumerWorker:
                     timestamp=alert.timestamp
                 )
                 logger.info("Notification sent successfully.")
+                self.consumer.commit()
             except Exception as e:
-                logger.error(f"Failed to send notification: {e}")
+                logger.error(f"Failed to process message: {e}")
 
 
 if __name__ == "__main__":
     logger.info("Starting ConsumerWorker...")
-    worker = ConsumerWorker()
+    notifier = NotifierFactory.get_notifier("email")
+    notification_service = NotificationService(notifier)
+    worker = ConsumerWorker(notification_service=notification_service)
     logger.info("ConsumerWorker initialized.")
     worker.run()

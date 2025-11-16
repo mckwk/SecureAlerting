@@ -11,3 +11,4 @@ httpx
 requests
 plyer
 jinja2
+tenacity
