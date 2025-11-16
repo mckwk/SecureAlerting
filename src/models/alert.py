@@ -1,3 +1,6 @@
+from datetime import datetime
+
+
 class Alert:
     def __init__(self, id: str, message: str, severity: str, timestamp: str):
         self.id = id
@@ -10,5 +13,5 @@ class Alert:
             "id": self.id,
             "message": self.message,
             "severity": self.severity,
-            "timestamp": self.timestamp,
+            "timestamp": self.timestamp.isoformat() if isinstance(self.timestamp, datetime) else self.timestamp,
         }

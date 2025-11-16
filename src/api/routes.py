@@ -1,4 +1,6 @@
+from datetime import datetime
 from typing import List
+
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 
@@ -26,7 +28,7 @@ async def create_alert(request: Request):
         id=new_id,
         message=message,
         severity=severity,
-        timestamp="N/A"
+        timestamp=datetime.now()
     )
     alerts_db.append(alert_obj)
 

@@ -1,5 +1,5 @@
-from src.models.risk_estimation import RiskModelFactory
 from src.models.alert import Alert
+from src.models.risk_estimation import RiskModelFactory
 
 
 class RiskEvaluator:

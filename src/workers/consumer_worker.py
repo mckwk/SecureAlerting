@@ -6,9 +6,9 @@ from kafka import KafkaConsumer
 from kafka.errors import NoBrokersAvailable
 
 from src.config.settings import settings
+from src.models.alert import Alert
 from src.services.notification_service import NotificationService
 from src.services.notifier_factory import NotifierFactory
-from src.models.alert import Alert
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
