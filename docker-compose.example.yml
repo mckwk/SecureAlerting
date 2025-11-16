@@ -48,3 +48,20 @@ services:
     image: wurstmeister/zookeeper:latest
     ports:
       - "2181:2181"
+
+  consumer_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      broker:
+        condition: service_healthy
+    environment:
+      - KAFKA_BROKER_URL=broker:9093
+      - NOTIFICATION_TOPIC=alert_notifications
+      - SMTP_SERVER=<your-smtp-server>
+      - SMTP_PORT=<your-smtp-port>
+      - SMTP_USER=<your-smtp-user>
+      - SMTP_PASSWORD=<your-smtp-password>
+      - PYTHONPATH=/app/
+    command: python src/workers/consumer_worker.py
