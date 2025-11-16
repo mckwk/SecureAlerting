@@ -1,35 +1,6 @@
 # Secure Alerting
 
-Secure Alerting is a microservice designed to collect, process, and deliver alert notifications in real-time. It integrates with Kafka for publish-subscribe messaging and provides a FastAPI-based REST API for managing alerts.
-
-## Project Structure
-
-```
-secure-alerting
-├── src
-│   ├── app.py                  # Entry point of the application
-│   ├── api
-│   │   └── routes.py           # API routes for alert notifications
-│   ├── services
-│   │   ├── kafka_consumer.py   # Kafka consumer for incoming alerts
-│   │   ├── kafka_producer.py   # Kafka producer for sending notifications
-│   │   └── notifier.py         # Logic for processing and sending notifications
-│   ├── models
-│   │   └── alert.py            # Alert model definition
-│   ├── schemas
-│   │   └── alert_schema.py     # Pydantic schema for alert validation
-│   ├── config
-│   │   └── settings.py         # Configuration settings
-│   ├── workers
-│   │   └── consumer_worker.py  # Background worker for consuming Kafka messages
-├── tests
-│   └── test_notifications.py   # Unit tests for notifications and Kafka integration
-├── Dockerfile                  # Instructions for building the Docker image
-├── docker-compose.yml          # Defines services and dependencies for Docker
-├── requirements.txt            # Python dependencies
-├── .env.example                # Example environment variables
-└── README.md                   # Project documentation
-```
+Secure Alerting is a microservice designed to collect, process, and deliver alert notifications. It integrates with Kafka for publish-subscribe messaging and provides an API for managing alerts.
 
 
 ## Setup Instructions
@@ -52,17 +23,20 @@ secure-alerting
    cp .env.example .env
    ```
 
-3. **Build the Docker image:**
+3. **Set up Docker Compose configuration:**
+   Copy `docker-compose.example.yml` to `docker-compose.yml`:
    ```bash
-   docker build -t secure-alerting .
+   cp docker-compose.example.yml docker-compose.yml
+   ```
+   Replace placeholders (e.g., `<your-smtp-server>`, `<your-smtp-user>`) with your actual values.
+
+
+4. ** Build and run the application using Docker Compose:**
+   ```bash
+   docker-compose up --build
    ```
 
-4. **Run the application using Docker Compose:**
-   ```bash
-   docker-compose up
-   ```
-
-5. **Access the API:**
+6. **Access the API:**
    The API will be available at `http://localhost:8000`.
 
 ## API Endpoints
@@ -81,7 +55,7 @@ Request Body:
 Response:
 ```json
 {
-  "status": "Notification sent"
+  "status": "Alert published to Kafka"
 }
 ```
 
@@ -111,13 +85,6 @@ Response:
 }
 ```
 
-## Testing
-
-Run the tests using `pytest`:
-```bash
-pytest
-```
-
 ## Configuration
 
 The application uses environment variables for configuration. Key variables include:
@@ -126,6 +93,10 @@ The application uses environment variables for configuration. Key variables incl
 - `NOTIFICATION_TOPIC`: Kafka topic for notifications (default: `alert_notifications`)
 - `HOST`: Host for the FastAPI app (default: `0.0.0.0`)
 - `PORT`: Port for the FastAPI app (default: `8000`)
+- `SMTP_SERVER`: SMTP server for sending emails
+- `SMTP_PORT`: SMTP server port
+- `SMTP_USER`: SMTP username
+- `SMTP_PASSWORD`: SMTP password
 
 ## Dependencies
 
