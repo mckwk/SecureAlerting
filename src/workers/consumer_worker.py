@@ -1,6 +1,9 @@
 import json
 import logging
 import time
+import threading
+from queue import Queue
+from datetime import datetime
 
 from kafka import KafkaConsumer
 from kafka.errors import NoBrokersAvailable
@@ -9,19 +12,28 @@ from src.config.settings import settings
 from src.models.alert import Alert
 from src.services.notification_service import NotificationService
 from src.services.notifier_factory import NotifierFactory
+from src.services.risk_evaluator import RiskEvaluator
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 class ConsumerWorker:
-    def __init__(self, notification_service: NotificationService, max_retries=5, retry_delay=5):
+    def __init__(self, notification_service: NotificationService, max_retries=5, retry_delay=5, batch_interval=60):
         self.notification_service = notification_service
         self.max_retries = max_retries
         self.retry_delay = retry_delay
         self.consumer = None
+        self.risk_evaluator = RiskEvaluator()
+        self.batch_queue = Queue()
+        self.batch_interval = settings.BATCH_NOTIFICATION_INTERVAL  # Time in seconds
+        self.last_batch_time = datetime.now()
 
         self.connect_to_broker()
+
+        # Start the batch processing thread
+        self.batch_thread = threading.Thread(target=self.process_batch_queue, daemon=True)
+        self.batch_thread.start()
 
     def connect_to_broker(self):
         retries = 0
@@ -49,6 +61,27 @@ class ConsumerWorker:
                     raise RuntimeError(
                         "Exceeded maximum retries to connect to Kafka broker.")
 
+    def process_batch_queue(self):
+        while True:
+            now = datetime.now()
+            if not self.batch_queue.empty() and (now - self.last_batch_time).total_seconds() >= self.batch_interval:
+                self.last_batch_time = now
+                batch = []
+                while not self.batch_queue.empty():
+                    batch.append(self.batch_queue.get())
+                self.send_batch_notifications(batch)
+
+    def send_batch_notifications(self, batch):
+        try:
+            self.notification_service.notifier.send_batch(
+                recipient=settings.DEFAULT_NOTIFICATION_RECIPIENT,
+                subject="Batched Alert Notifications",
+                alerts=batch
+            )
+            logger.info("Batched email sent successfully.")
+        except Exception as e:
+            logger.error(f"Failed to send batched email: {e}")
+
     def run(self):
         logger.info("Running ConsumerWorker...")
         for message in self.consumer:
@@ -60,18 +93,29 @@ class ConsumerWorker:
                 timestamp=alert_data.get("timestamp", "N/A")
             )
             logger.info(f"Processing alert: {alert.to_dict()}")
-            try:
-                self.notification_service.send_notification(
-                    recipient=settings.DEFAULT_NOTIFICATION_RECIPIENT,
-                    subject=f"[SEVERITY: {alert.severity.upper()}] New Alert Notification",
-                    message=alert.message,
-                    severity=alert.severity,
-                    timestamp=alert.timestamp
-                )
-                logger.info("Notification sent successfully.")
-                self.consumer.commit()
-            except Exception as e:
-                logger.error(f"Failed to process message: {e}")
+
+            # Evaluate risk score
+            risk = self.risk_evaluator.evaluate_risk(alert)
+            risk_score = risk["risk_score"]
+
+            if risk_score > 50:
+                # Send notification immediately
+                try:
+                    self.notification_service.send_notification(
+                        recipient=settings.DEFAULT_NOTIFICATION_RECIPIENT,
+                        subject=f"[SEVERITY: {alert.severity.upper()}] Immediate Alert Notification",
+                        message=alert.message,
+                        severity=alert.severity,
+                        timestamp=alert.timestamp
+                    )
+                    logger.info("Immediate notification sent successfully.")
+                    self.consumer.commit()
+                except Exception as e:
+                    logger.error(f"Failed to process immediate notification: {e}")
+            else:
+                # Add to batch queue
+                self.batch_queue.put(alert.to_dict())
+                logger.info(f"Alert added to batch queue: {alert.id}")
 
 
 if __name__ == "__main__":

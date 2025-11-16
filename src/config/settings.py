@@ -62,7 +62,11 @@ class Settings(BaseModel):
         default=os.getenv("DEFAULT_NOTIFICATION_RECIPIENT", "test_user@example.com"),
         description="Default recipient for notifications"
     )
-
+    BATCH_NOTIFICATION_INTERVAL: int = Field(
+        default=int(os.getenv("BATCH_NOTIFICATION_INTERVAL", 60)),
+        ge=1,
+        description="Interval in seconds for sending batched notifications"
+    )
 
     @field_validator("ALLOW_ORIGINS", mode="before")
     def validate_allow_origins(cls, value):

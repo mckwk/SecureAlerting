@@ -1,7 +1,7 @@
 import os
 from abc import ABC, abstractmethod
 
-from config import settings
+from src.config.settings import settings
 
 
 class RiskEstimationModule(ABC):

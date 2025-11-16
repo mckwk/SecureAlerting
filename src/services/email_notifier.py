@@ -52,3 +52,30 @@ class EmailNotifier(INotifier):
         except Exception as e:
             self.logger.error(f"Failed to send email: {e}")
             raise  # Reraise the exception to ensure proper handling
+
+    def send_batch(self, recipient, subject, alerts):
+        try:
+            sender = settings.EMAIL_SENDER
+
+            env = Environment(loader=FileSystemLoader('src/templates'))
+            template = env.get_template('batched_alert_email_template.html')
+            html_content = template.render(alerts=alerts)
+
+            msg = MIMEMultipart("alternative")
+            msg['Subject'] = subject
+            msg['From'] = sender
+            msg['To'] = recipient
+            msg.attach(MIMEText(html_content, "html"))
+
+            with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
+                server.starttls()
+                server.login(self.smtp_user, self.smtp_password)
+                server.sendmail(sender, recipient, msg.as_string())
+
+            self.logger.info(f"Batched email sent to {recipient}")
+        except smtplib.SMTPException as e:
+            self.logger.error(f"SMTP error occurred: {e}")
+            raise
+        except Exception as e:
+            self.logger.error(f"Failed to send batched email: {e}")
+            raise
