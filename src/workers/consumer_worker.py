@@ -8,6 +8,7 @@ from kafka.errors import NoBrokersAvailable
 from src.config.settings import settings
 from src.services.notification_service import NotificationService
 from src.services.notifier_factory import NotifierFactory
+from src.models.alert import Alert
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -52,15 +53,21 @@ class ConsumerWorker:
     def run(self):
         logger.info("Running ConsumerWorker...")
         for message in self.consumer:
-            alert = message.value
-            logger.info(f"Processing alert: {alert}")
+            alert_data = message.value
+            alert = Alert(
+                id=alert_data["id"],
+                message=alert_data["message"],
+                severity=alert_data["severity"],
+                timestamp=alert_data.get("timestamp", "N/A")
+            )
+            logger.info(f"Processing alert: {alert.to_dict()}")
             try:
                 self.notification_service.send_notification(
                     recipient="test_user@example.com",
-                    subject=f"[SEVERITY: {alert['severity'].upper()}] New Alert Notification",
-                    message=alert["message"],
-                    severity=alert["severity"],
-                    timestamp=alert.get("timestamp", "N/A")
+                    subject=f"[SEVERITY: {alert.severity.upper()}] New Alert Notification",
+                    message=alert.message,
+                    severity=alert.severity,
+                    timestamp=alert.timestamp
                 )
                 logger.info("Notification sent successfully.")
             except Exception as e:

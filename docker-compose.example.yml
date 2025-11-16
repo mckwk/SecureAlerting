@@ -5,16 +5,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
-    environment:
-      - KAFKA_BROKER_URL=broker:9093
-      - NOTIFICATION_TOPIC=alert_notifications
-      - HOST=0.0.0.0
-      - PORT=8000
-      - ALLOW_ORIGINS=*
-      - SMTP_SERVER=<your-smtp-server>
-      - SMTP_PORT=<your-smtp-port>
-      - SMTP_USER=<your-smtp-user>
-      - SMTP_PASSWORD=<your-smtp-password>
+    env_file:
+      - .env  # Ensure .env contains non-sensitive environment variables
     depends_on:
       broker:
         condition: service_healthy
@@ -56,12 +48,8 @@ services:
     depends_on:
       broker:
         condition: service_healthy
+    env_file:
+      - .env  # Ensure .env contains non-sensitive environment variables
     environment:
-      - KAFKA_BROKER_URL=broker:9093
-      - NOTIFICATION_TOPIC=alert_notifications
-      - SMTP_SERVER=<your-smtp-server>
-      - SMTP_PORT=<your-smtp-port>
-      - SMTP_USER=<your-smtp-user>
-      - SMTP_PASSWORD=<your-smtp-password>
       - PYTHONPATH=/app/
     command: python src/workers/consumer_worker.py
