@@ -2,6 +2,7 @@ import logging
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from jinja2 import Environment, FileSystemLoader
 
 from src.config.settings import settings
 from src.services.notifier import INotifier
@@ -17,13 +18,15 @@ class EmailNotifier(INotifier):
 
     def send(self, recipient, subject, message, severity, timestamp):
         try:
-            sender = "Secure Alerting <from@example.com>"
+            sender = settings.EMAIL_SENDER
 
-            with open("src/templates/alert_email_template.html", "r") as template_file:
-                html_template = template_file.read()
-            html_content = html_template.replace("{{ alert_message }}", message)\
-                .replace("{{ alert_severity }}", severity)\
-                .replace("{{ alert_timestamp }}", timestamp)
+            env = Environment(loader=FileSystemLoader('src/templates'))
+            template = env.get_template('alert_email_template.html')
+            html_content = template.render(
+                alert_message=message,
+                alert_severity=severity,
+                alert_timestamp=timestamp
+            )
 
             msg = MIMEMultipart("alternative")
             msg['Subject'] = subject

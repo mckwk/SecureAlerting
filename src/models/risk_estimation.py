@@ -1,6 +1,8 @@
 import os
 from abc import ABC, abstractmethod
 
+from config import settings
+
 
 class RiskEstimationModule(ABC):
     @abstractmethod
@@ -27,7 +29,7 @@ class BaselineRiskModel(RiskEstimationModule):
 class RiskModelFactory:
     @staticmethod
     def get_active_model() -> RiskEstimationModule:
-        model_name = os.getenv("RISK_MODEL", "BaselineRiskModel")
+        model_name = settings.RISK_MODEL
         if model_name == "BaselineRiskModel":
             return BaselineRiskModel()
         else:

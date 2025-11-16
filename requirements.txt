@@ -2,6 +2,7 @@ fastapi
 uvicorn
 kafka-python
 pydantic
+pydantic[email]
 python-dotenv
 pytest
 pytest-asyncio
@@ -9,3 +10,4 @@ aiohttp
 httpx
 requests
 plyer
+jinja2

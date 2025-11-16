@@ -31,7 +31,7 @@ class ConsumerWorker:
                 self.consumer = KafkaConsumer(
                     settings.NOTIFICATION_TOPIC,
                     bootstrap_servers=settings.KAFKA_BROKER_URL,
-                    group_id="consumer_worker_group",
+                    group_id=settings.KAFKA_CONSUMER_GROUP,
                     value_deserializer=lambda m: json.loads(m.decode('utf-8')),
                     auto_offset_reset='earliest',
                     enable_auto_commit=True
@@ -63,7 +63,7 @@ class ConsumerWorker:
             logger.info(f"Processing alert: {alert.to_dict()}")
             try:
                 self.notification_service.send_notification(
-                    recipient="test_user@example.com",
+                    recipient=settings.DEFAULT_NOTIFICATION_RECIPIENT,
                     subject=f"[SEVERITY: {alert.severity.upper()}] New Alert Notification",
                     message=alert.message,
                     severity=alert.severity,
