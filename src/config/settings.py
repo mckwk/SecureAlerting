@@ -68,6 +68,12 @@ class Settings(BaseModel):
         description="Interval in seconds for sending batched notifications"
     )
 
+    #db config
+    DATABASE_URI: str = Field(
+        default=os.getenv("DATABASE_URI", ""),
+        description="Database URI"
+    )
+
     @field_validator("ALLOW_ORIGINS", mode="before")
     def validate_allow_origins(cls, value):
         if value == "*":
