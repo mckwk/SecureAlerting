@@ -1,0 +1,13 @@
+class AlertDbConstants:
+
+    ALERT_SENDING_STATUS_REF_SENT = 'sent'
+    ALERT_SENDING_STATUS_REF_PENDING = 'pending'
+    ALERT_SENDING_STATUS_REF_ERROR = 'error'
+
+    ALERT_TYPE_REF_EMAIL = 'email'
+    ALERT_TYPE_REF_SMS = 'sms'
+
+    ALERT_SEVERITY_REF_CRITICAL = 'critical'
+    ALERT_SEVERITY_REF_HIGH = 'high'
+    ALERT_SEVERITY_REF_MEDIUM = 'medium'
+    ALERT_SEVERITY_REF_LOW = 'low'
