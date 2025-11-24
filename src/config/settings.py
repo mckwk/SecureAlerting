@@ -74,6 +74,12 @@ class Settings(BaseModel):
         description="Database URI"
     )
 
+    #test db config
+    TEST_DATABASE_URI: str = Field(
+        default=os.getenv("TEST_DATABASE_URI", ""),
+        description="Test Database URI - destroyed and recreated during tests"
+    )
+
     @field_validator("ALLOW_ORIGINS", mode="before")
     def validate_allow_origins(cls, value):
         if value == "*":
