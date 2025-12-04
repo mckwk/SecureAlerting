@@ -104,7 +104,7 @@ class ConsumerWorker:
                 for channel in settings.NOTIFICATION_CHANNELS:
                     try:
                         notifier = NotifierFactory.get_notifier(channel)
-                        recipient = self.get_recipient(channel)
+                        recipient = notifier.get_recipient()
                         notification_service = NotificationService(notifier)
 
                         notification_service.send_notification(
