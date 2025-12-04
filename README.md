@@ -1,6 +1,6 @@
 # Secure Alerting
 
-Secure Alerting is a microservice designed to collect, process, and deliver alert notifications. It integrates with Kafka for publish-subscribe messaging and provides an API for managing alerts. Notifications can now be sent via multiple channels, including email and SMS.
+Secure Alerting is a microservice designed to collect, process, and deliver alert notifications. It integrates with Kafka for publish-subscribe messaging and provides an API for managing alerts. Notifications can now be sent via multiple channels, including email (all alert levels - single and batched notifications) and SMS (high and critial notifications).
 
 
 ## Setup Instructions
