@@ -19,8 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class ConsumerWorker:
-    def __init__(self, notification_service: NotificationService, max_retries=5, retry_delay=5, batch_interval=60):
-        self.notification_service = notification_service
+    def __init__(self, max_retries=5, retry_delay=5, batch_interval=60):
         self.max_retries = max_retries
         self.retry_delay = retry_delay
         self.consumer = None
@@ -73,7 +72,9 @@ class ConsumerWorker:
 
     def send_batch_notifications(self, batch):
         try:
-            self.notification_service.notifier.send_batch(
+            notifier = NotifierFactory.get_notifier("email")  # Use email for batched notifications
+            notification_service = NotificationService(notifier)
+            notification_service.notifier.send_batch(
                 recipient=settings.DEFAULT_NOTIFICATION_RECIPIENT,
                 subject="Batched Alert Notifications",
                 alerts=batch
@@ -99,29 +100,32 @@ class ConsumerWorker:
             risk_score = risk["risk_score"]
 
             if risk_score > 50:
-                # Send notification immediately
-                try:
-                    self.notification_service.send_notification(
-                        recipient=settings.DEFAULT_NOTIFICATION_RECIPIENT,
-                        subject=f"[SEVERITY: {alert.severity.upper()}] Immediate Alert Notification",
-                        message=alert.message,
-                        severity=alert.severity,
-                        timestamp=alert.timestamp
-                    )
-                    logger.info("Immediate notification sent successfully.")
-                    self.consumer.commit()
-                except Exception as e:
-                    logger.error(f"Failed to process immediate notification: {e}")
+                # Send notifications to all specified channels
+                for channel in settings.NOTIFICATION_CHANNELS:
+                    try:
+                        notifier = NotifierFactory.get_notifier(channel)
+                        recipient = self.get_recipient(channel)
+                        notification_service = NotificationService(notifier)
+
+                        notification_service.send_notification(
+                            recipient=recipient,
+                            subject=f"[SEVERITY: {alert.severity.upper()}] Immediate Alert Notification",
+                            message=alert.message,
+                            severity=alert.severity,
+                            timestamp=alert.timestamp
+                        )
+                        logger.info(f"Immediate {channel.upper()} notification sent successfully.")
+                    except Exception as e:
+                        logger.error(f"Failed to send {channel.upper()} notification: {e}")
+
+                self.consumer.commit()
             else:
                 # Add to batch queue
                 self.batch_queue.put(alert.to_dict())
                 logger.info(f"Alert added to batch queue: {alert.id}")
 
-
 if __name__ == "__main__":
     logger.info("Starting ConsumerWorker...")
-    notifier = NotifierFactory.get_notifier("email")
-    notification_service = NotificationService(notifier)
-    worker = ConsumerWorker(notification_service=notification_service)
+    worker = ConsumerWorker()
     logger.info("ConsumerWorker initialized.")
     worker.run()

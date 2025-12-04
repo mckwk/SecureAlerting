@@ -68,6 +68,28 @@ class Settings(BaseModel):
         description="Interval in seconds for sending batched notifications"
     )
 
+    # Twilio Configuration (SMS)
+    TWILIO_ACCOUNT_SID: str = Field(
+        default=os.getenv("TWILIO_ACCOUNT_SID"),
+        description="Twilio Account SID"
+    )
+    TWILIO_AUTH_TOKEN: str = Field(
+        default=os.getenv("TWILIO_AUTH_TOKEN"),
+        description="Twilio Auth Token"
+    )
+    TWILIO_PHONE_NUMBER: str = Field(
+        default=os.getenv("TWILIO_PHONE_NUMBER"),
+        description="Twilio Phone Number"
+    )
+    SMS_RECIPIENT: str = Field(
+        default=os.getenv("SMS_RECIPIENT"),
+        description="Default recipient for SMS notifications"
+    )
+    NOTIFICATION_CHANNELS: List[str] = Field(
+        default_factory=lambda: os.getenv("NOTIFICATION_CHANNELS", "email").split(","),
+        description="Comma-separated list of notification channels (e.g., email,sms)"
+    )
+
     @field_validator("ALLOW_ORIGINS", mode="before")
     def validate_allow_origins(cls, value):
         if value == "*":

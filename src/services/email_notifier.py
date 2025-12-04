@@ -79,3 +79,6 @@ class EmailNotifier(INotifier):
         except Exception as e:
             self.logger.error(f"Failed to send batched email: {e}")
             raise
+
+    def get_recipient(self):
+        return settings.DEFAULT_NOTIFICATION_RECIPIENT
