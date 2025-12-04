@@ -1,11 +1,12 @@
 from datetime import datetime
+import html
 
 
 class Alert:
     def __init__(self, id: str, message: str, severity: str, timestamp: str):
-        self.id = id
-        self.message = message
-        self.severity = severity
+        self.id = html.escape(str(id))
+        self.message = html.escape(message)
+        self.severity = html.escape(severity)
         self.timestamp = timestamp
 
     def to_dict(self):
