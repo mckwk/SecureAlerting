@@ -1,9 +1,9 @@
 import json
 import logging
-import time
 import threading
-from queue import Queue
+import time
 from datetime import datetime
+from queue import Queue
 
 from kafka import KafkaConsumer
 from kafka.errors import NoBrokersAvailable
@@ -31,7 +31,8 @@ class ConsumerWorker:
         self.connect_to_broker()
 
         # Start the batch processing thread
-        self.batch_thread = threading.Thread(target=self.process_batch_queue, daemon=True)
+        self.batch_thread = threading.Thread(
+            target=self.process_batch_queue, daemon=True)
         self.batch_thread.start()
 
     def connect_to_broker(self):
@@ -72,7 +73,8 @@ class ConsumerWorker:
 
     def send_batch_notifications(self, batch):
         try:
-            notifier = NotifierFactory.get_notifier("email")  # Use email for batched notifications
+            # Use email for batched notifications
+            notifier = NotifierFactory.get_notifier("email")
             notification_service = NotificationService(notifier)
             notification_service.notifier.send_batch(
                 recipient=settings.DEFAULT_NOTIFICATION_RECIPIENT,
@@ -114,15 +116,18 @@ class ConsumerWorker:
                             severity=alert.severity,
                             timestamp=alert.timestamp
                         )
-                        logger.info(f"Immediate {channel.upper()} notification sent successfully.")
+                        logger.info(
+                            f"Immediate {channel.upper()} notification sent successfully.")
                     except Exception as e:
-                        logger.error(f"Failed to send {channel.upper()} notification: {e}")
+                        logger.error(
+                            f"Failed to send {channel.upper()} notification: {e}")
 
                 self.consumer.commit()
             else:
                 # Add to batch queue
                 self.batch_queue.put(alert.to_dict())
                 logger.info(f"Alert added to batch queue: {alert.id}")
+
 
 if __name__ == "__main__":
     logger.info("Starting ConsumerWorker...")

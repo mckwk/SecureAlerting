@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field, AnyHttpUrl, EmailStr, field_validator
-from typing import List
 import os
+from typing import List
+
+from pydantic import AnyHttpUrl, BaseModel, EmailStr, Field, field_validator
 
 
 class Settings(BaseModel):
@@ -55,11 +56,13 @@ class Settings(BaseModel):
         description="SMTP password"
     )
     EMAIL_SENDER: str = Field(
-        default=os.getenv("EMAIL_SENDER", "Secure Alerting <from@example.com>"),
+        default=os.getenv(
+            "EMAIL_SENDER", "Secure Alerting <from@example.com>"),
         description="Email sender address"
     )
     DEFAULT_NOTIFICATION_RECIPIENT: EmailStr = Field(
-        default=os.getenv("DEFAULT_NOTIFICATION_RECIPIENT", "test_user@example.com"),
+        default=os.getenv("DEFAULT_NOTIFICATION_RECIPIENT",
+                          "test_user@example.com"),
         description="Default recipient for notifications"
     )
     BATCH_NOTIFICATION_INTERVAL: int = Field(
@@ -86,7 +89,8 @@ class Settings(BaseModel):
         description="Default recipient for SMS notifications"
     )
     NOTIFICATION_CHANNELS: List[str] = Field(
-        default_factory=lambda: os.getenv("NOTIFICATION_CHANNELS", "email").split(","),
+        default_factory=lambda: os.getenv(
+            "NOTIFICATION_CHANNELS", "email").split(","),
         description="Comma-separated list of notification channels (e.g., email,sms)"
     )
 
